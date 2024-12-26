@@ -1,7 +1,7 @@
 import argparse
 import gym
 from ReinforcementLearning.DeepQLearning.utils import plotLearning
-from ReinforcementLearning.DeepQLearning.simple_dqn_torch import Agent
+from ReinforcementLearning.DeepQLearning.simple_dqn_torch_2020 import Agent
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

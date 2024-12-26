@@ -17,6 +17,8 @@ class Agent:
 
     def choose_action(self, observation):
         state = tf.convert_to_tensor([observation])
+        print(observation)
+        #state = tf.ragged.constant([observation])
         _, probs = self.actor_critic(state)
 
         action_probabilities = tfp.distributions.Categorical(probs=probs)
@@ -38,6 +40,9 @@ class Agent:
         state = tf.convert_to_tensor([state], dtype=tf.float32)
         state_ = tf.convert_to_tensor([state_], dtype=tf.float32)
         reward = tf.convert_to_tensor(reward, dtype=tf.float32) # not fed to NN
+        #state = tf.ragged.constant([state], dtype=tf.float32)
+        #state_ = tf.ragged.constant([state_], dtype=tf.float32)
+        #reward = tf.ragged.constant(reward, dtype=tf.float32) # not fed to NN
         with tf.GradientTape(persistent=True) as tape:
             state_value, probs = self.actor_critic(state)
             state_value_, _ = self.actor_critic(state_)

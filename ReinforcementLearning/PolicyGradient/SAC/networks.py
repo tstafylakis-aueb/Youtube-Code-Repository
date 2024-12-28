@@ -22,8 +22,8 @@ class CriticNetwork(nn.Module):
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
         self.q = nn.Linear(self.fc2_dims, 1)
 
-        self.optimizer = optim.Adam(self.parameters(), lr=beta)
-        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.optimizer = optim.AdamW(self.parameters(), lr=beta)
+        self.device = T.device('cuda:0' if T.cuda.is_available() else 'mps')
 
         self.to(self.device)
 
@@ -58,10 +58,12 @@ class ValueNetwork(nn.Module):
         self.fc2 = nn.Linear(self.fc1_dims, fc2_dims)
         self.v = nn.Linear(self.fc2_dims, 1)
 
-        self.optimizer = optim.Adam(self.parameters(), lr=beta)
-        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.optimizer = optim.AdamW(self.parameters(), lr=beta)
+        self.device = T.device('cuda:0' if T.cuda.is_available() else 'mps')
 
         self.to(self.device)
+        print("device: ")
+        print(self.device)
 
     def forward(self, state):
         state_value = self.fc1(state)
@@ -98,8 +100,8 @@ class ActorNetwork(nn.Module):
         self.mu = nn.Linear(self.fc2_dims, self.n_actions)
         self.sigma = nn.Linear(self.fc2_dims, self.n_actions)
 
-        self.optimizer = optim.Adam(self.parameters(), lr=alpha)
-        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.optimizer = optim.AdamW(self.parameters(), lr=alpha)
+        self.device = T.device('cuda:0' if T.cuda.is_available() else 'mps')
 
         self.to(self.device)
 
@@ -108,8 +110,11 @@ class ActorNetwork(nn.Module):
         prob = F.relu(prob)
         prob = self.fc2(prob)
         prob = F.relu(prob)
-
         mu = self.mu(prob)
+        if T.isnan(mu).any():
+            print(self.mu.weight)
+            print(self.mu.bias)
+        
         sigma = self.sigma(prob)
         sigma = self.reparam_noise + F.softplus(sigma)
         #sigma = T.clamp(sigma, min=self.reparam_noise, max=1)
@@ -132,7 +137,7 @@ class ActorNetwork(nn.Module):
         max_act = T.tensor(self.max_action).to(self.device)
         action = T.tanh(actions)
         log_probs = probabilities.log_prob(actions)
-        log_probs -= T.log((1-action.pow(2))) + T.log(max_act)
+        log_probs -= T.log((1-action.pow(2)*0.999)) + T.log(max_act)
         log_probs = log_probs.sum(1, keepdim=True)
         action = action*max_act
 

@@ -8,7 +8,8 @@ from gymnasium import wrappers
 
 if __name__ == '__main__':
     #env = gym.make('InvertedPendulumBulletEnv-v0')
-    env = gym.make('InvertedPendulum')
+    #env = gym.make('InvertedPendulum')
+    env = gym.make('Ant')
     agent = Agent(input_dims=env.observation_space.shape, env=env,
             n_actions=env.action_space.shape[0])
     n_games = 400
